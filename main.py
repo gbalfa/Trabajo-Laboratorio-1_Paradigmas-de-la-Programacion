@@ -17,25 +17,36 @@ def adentro(P, p1, p2):
             return True
     return False
     
-P = match.create_random_points(1000)
+# def usado(pos, PuntosApareados):
+#     for i in PuntosApareados:
+#         if 
+
+
+P = match.create_random_points(10)
+P.sort(key = lambda x: x.x)
 R = []
 sobras = []
 indexPuntosApareados = []
 i = 0
 largoP = len(P)
-while(i < largoP):
+while(i < largoP-1):
     p1 = P[i]
     j=i+1
-    p2 = P[j]
     flag = True
-    while flag:
+    while flag and j < largoP:
+        p2 = P[j]
         if p1.color == p2.color:
-            R.append(match.Rectangle(p1,p2))
+            if p1.y >p2.y:
+                R.append(match.Rectangle(p1.x, p2.x, p1.y, p2.y))
+            else:
+                R.append(match.Rectangle(p1.x, p2.x, p2.y, p1.y))
+            indexPuntosApareados.append((i,j))
             flag = False
         else:
             sobras.append(p2)
             j = j+1
-            p2 = P[j]
+    i+=1
 
+visual.Window(P, R)
    
 
