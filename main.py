@@ -19,49 +19,6 @@ def puntoEntremedio(P, index_p1, index_p2):
     return False
 
 
-def busquedaInversa(L, x):
-    """Función que busca el elemento x en una lista ordenada L de atrás hacia adelante.
-
-    Es más probable que el elemento x sea mayor, por lo tanto, la búsqueda es de adelante hacia atrás.
-
-    :param L: Lista ordenada de menor a mayor.
-    :param x: Index.
-    :returns: True si el elemento está presente en la lista, False si no.
-    :rtype: Bool.
-
-    """
-    largoL = len(L)
-    i = -1
-    while(-largoL <= i and x <= L[i]):
-        if L[i] == x:
-            return True
-        i -= 1
-    return False
-
-
-def insercionOrdenada(L, x):
-    """Función que inserta el elemento x de forma ordenada(menor a mayor) en L, basado en el algoritmo insertion sort.
-
-    Es más probable que el elemento x sea mayor, por lo tanto, la búsqueda del lugar de inserción es de adelante hacia atrás.
-
-    :param L: Lista ordenada de menor a mayor.
-    :param x: Index.
-    :returns: Modifica la misma lista.
-    :rtype: void.
-
-    """
-    L.append(x)
-    largoL = len(L)
-    if largoL == 1:
-        return
-    i = -2
-    while(-largoL <= i and x < L[i]):
-        L[i+1] = L[i]
-        i = i - 1
-    L[i+1] = x
-    return
-
-
 def interseccionRectangulos(R, p1, p2):
     """Función que verifica si el rectángulo que formaría p1 y p2 no se intersecta con rectángulos previamente creados.
 
@@ -92,21 +49,21 @@ def interseccionRectangulos(R, p1, p2):
 def heuristica(P):
     P.sort(key=lambda x: x.x)
     R = []
-    indexPuntosApareados = []
     largoP = len(P)
+    indexPuntosApareados = [False for i in range(largoP)]
     for i in range(largoP):
-        if (not busquedaInversa(indexPuntosApareados, i)):
+        if (not indexPuntosApareados[i]):
             p1 = P[i]
             for j in range(i+1, largoP):
                 p2 = P[j]
-                if (p1.color == p2.color) and (not busquedaInversa(indexPuntosApareados, j)) and (not puntoEntremedio(P, i, j)) and (not interseccionRectangulos(R, p1, p2)):
+                if (p1.color == p2.color) and (not indexPuntosApareados[j]) and (not puntoEntremedio(P, i, j)) and (not interseccionRectangulos(R, p1, p2)):
                     R.append(match.Rectangle(p1.x, p2.x, p1.y, p2.y))
-                    insercionOrdenada(indexPuntosApareados, j)
+                    indexPuntosApareados[j] = True
                     break
     return R
 
 
-n = 100
+n = 10000
 print(n)
 P = match.create_random_points(n)
 start = time.time()
