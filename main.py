@@ -3,13 +3,13 @@ import match
 import visual
 
 
-def puntoEntremedio(P, index_p1, index_p2):
-    """Función que verifica si hay puntos dentro de el rectángulo formado entre los puntos p1 y p2.
+def puntoEnInterior(P, index_p1, index_p2):
+    """Función que verifica si hay puntos al interior del rectángulo formado por los puntos p1 y p2.
 
-    :param P: Puntos ordenados segun su coordenada x de menor a mayor.
+    :param P: Puntos ordenados según su coordenada x de forma creciente.
     :param index_p1: Index punto p1 en P.
     :param index_p2: Index punto p2 en P.
-    :returns:  True si es que hay puntos dentro y False si no.
+    :returns:  True si es que hay puntos dentro, False si no.
     :rtype: Bool.
 
     """
@@ -19,16 +19,16 @@ def puntoEntremedio(P, index_p1, index_p2):
     return False
 
 
-def interseccionRectangulos(R, p1, p2):
-    """Función que verifica si el rectángulo que formaría p1 y p2 no se intersecta con rectángulos previamente creados.
+def superposicionRectangulos(R, p1, p2):
+    """Función que verifica si el rectángulo formado por los puntos p1 y p2 no superpone rectángulos previamente creados.
 
-    Es más probable que el rectángulo formado entre p1 y p2 se intersecte con los rectángulos creados recientemente, por lo tanto,
-    la búsqueda se realiza de adelante hacia atrás.
+    *Es más probable que el rectángulo formado entre p1 y p2 superponga rectángulos creados recientemente(más cercanos),
+    por lo tanto, la iteración se realiza desde el final al inicio de la lista.
 
     :param R: Lista de rectángulos.
-    :param p1: Punto.
+    :param p1: Punto de menor componente x(p1.x < p2.x).
     :param p2: Punto.
-    :returns: True si hay interseccion de rectángulos, False si no.
+    :returns: True si hay superposición de rectángulos, False si no.
     :rtype: Bool.
 
     """
@@ -38,37 +38,45 @@ def interseccionRectangulos(R, p1, p2):
     for i in range(-1, -largoR-1, -1):
         r = R[i]
         if p1.x < r.right:
-            ymax = max(r.bottom, r.top)
-            ymin = min(r.bottom, r.top)
-            if not ((p1.y < ymin and p2.y < ymin) or (p1.y > ymax and p2.y > ymax)):
+            if not ((p1.y < r.bottom and p2.y < r.bottom) or (p1.y > r.top and p2.y > r.top)):
                 return True
-
     return False
 
 
-def heuristica(P):
+def heuristica(P, largoP):
+    """Busca en un tiempo de cómputo razonable, la mayor cantidad de duplas que pueda de manera tal que estas puedan ser simultáneamente apareadas.
+
+        *El algoritmo barre el eje x de izquierda a derecha con el iterador i. Por cada P[i] se busca en los puntos
+    posteriores el primer P[j] que sea un apareamiento válido de acuerdo a criterios definidos y lo aparea.
+
+    :param P: Lista de puntos.
+    :param largoP: Cantidad de puntos.
+    :returns: Lista R de objetos match.Rectangle, correspondientes a cada una de las duplas.
+    :rtype: Lista.
+
+    """
     P.sort(key=lambda x: x.x)
+    boolIndexPuntosApareados = [False]*largoP
     R = []
-    largoP = len(P)
-    indexPuntosApareados = [False for i in range(largoP)]
     for i in range(largoP):
-        if (not indexPuntosApareados[i]):
+        if (not boolIndexPuntosApareados[i]):
             p1 = P[i]
             for j in range(i+1, largoP):
                 p2 = P[j]
-                if (p1.color == p2.color) and (not indexPuntosApareados[j]) and (not puntoEntremedio(P, i, j)) and (not interseccionRectangulos(R, p1, p2)):
-                    R.append(match.Rectangle(p1.x, p2.x, p1.y, p2.y))
-                    indexPuntosApareados[j] = True
+                if (p1.color == p2.color) and (not boolIndexPuntosApareados[j]) and (not puntoEnInterior(P, i, j)) and (not superposicionRectangulos(R, p1, p2)):
+                    R.append(match.Rectangle(
+                        p1.x, p2.x, min(p1.y, p2.y), max(p1.y, p2.y)))
+                    boolIndexPuntosApareados[j] = True
                     break
     return R
 
 
-n = 10000
-print(n)
-P = match.create_random_points(n)
-start = time.time()
-R = heuristica(P)
-end = time.time()
-print(end - start, " segundos")
-porcentaje = str(n) + " puntos:  " + (str(len(R)*2/n*100) + "%")
-visual.Window(P, R, porcentaje)
+def aparear(n):
+    P = match.create_random_points(n)
+    start = time.time()
+    R = heuristica(P, n)
+    end = time.time()
+    tiempo = " Tiempo: " + str(end - start) + " segundos"
+    windowTitle = str(n) + " puntos:  " + (str(len(R)*2/n*100) + "%" + tiempo)
+    visual.Window(P, R, windowTitle)
+    return

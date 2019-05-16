@@ -4,9 +4,9 @@ import math
 
 class Window:
 
-    def __init__(self, points=[], rectangles=[], porcentaje = ""):
+    def __init__(self, points=[], rectangles=[], title = ""):
         self.root = Tk()
-        self.root.title(porcentaje)
+        self.root.title(title)
         self.h = 1000
         self.w = 1000
         self.paper = Canvas(self.root, background="white",
